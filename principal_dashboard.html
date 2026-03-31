@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal Command - RSP Core</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #030712; }
+        .bg-grid {
+            background-size: 30px 30px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.2); border-radius: 10px; }
+        .glass-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col bg-grid overflow-hidden">
+
+<nav class="h-16 flex justify-between items-center px-8 bg-[#030712]/80 backdrop-blur-md border-b border-white/10 z-50">
+    <div class="flex items-center gap-4">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]">P</div>
+        <h1 class="text-xl font-extrabold tracking-tight text-white">RSP <span class="text-blue-400">COMMAND</span></h1>
+    </div>
+    <div class="flex items-center gap-6 text-sm font-medium">
+        <a href="/" class="bg-white/5 hover:bg-white/10 text-slate-300 px-5 py-2 rounded-xl border border-white/10 transition-all font-bold flex items-center gap-2">
+            ← Return to Home
+        </a>
+    </div>
+</nav>
+
+<div class="flex flex-1 overflow-hidden">
+    <aside class="w-80 glass-card border-r border-white/10 p-6 flex flex-col gap-8 custom-scrollbar overflow-y-auto">
+        <section>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-purple-400">Live Transmissions</h2>
+                <span id="notif-count" class="bg-purple-600 text-[9px] px-2 py-0.5 rounded-full text-white font-bold">0</span>
+            </div>
+            <div id="notification-feed" class="space-y-3 min-h-[100px]"></div>
+        </section>
+
+        <section class="border-t border-white/5 pt-6">
+            <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-blue-400 mb-4">Registry Search</h2>
+            <input type="text" id="studentSearch" onkeyup="filterStudents()" placeholder="Search student..."
+                    class="w-full bg-[#030712]/50 border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none">
+        </section>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto custom-scrollbar relative">
+        <header class="mb-8">
+            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Entity Management</h3>
+            <p class="text-3xl font-extrabold text-white">Student Database</p>
+        </header>
+
+        <div id="student-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% for student in students %}
+            <div class="student-card glass-card group p-6 rounded-3xl border border-white/5 hover:border-blue-500/40 transition-all duration-300" data-name="{{ student.get('name', student.get('username')) | lower }}">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="text-lg font-bold text-white">{{ student.get('name', student.get('username')) }}</h4>
+                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{{ student.get('level', 'Active') }}</p>
+                    </div>
+                    <button onclick="deleteStudent('{{ student.id }}')" class="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white p-2 rounded-lg border border-red-500/20 transition-all opacity-0 group-hover:opacity-100">🗑️</button>
+                </div>
+                <div class="space-y-2">
+                    <button onclick="openChat('{{ student.id }}', '{{ student.get('name', student.get('username')) }}')" 
+                        class="w-full bg-purple-600 hover:bg-purple-500 text-white py-2.5 rounded-xl text-[11px] font-bold transition-all shadow-[0_0_15px_rgba(147,51,234,0.2)]">💬 Open Comms</button>
+                    <button onclick="inspectStudent('{{ student.id }}', '{{ student.get('name', student.get('username')) }}')" 
+                        class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 py-2.5 rounded-xl text-[11px] font-bold transition-all">🔍 Inspect & Academic Info</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+
+<div id="inspect-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4">
+    <div class="glass-card w-full max-w-xl rounded-3xl flex flex-col overflow-hidden border border-blue-500/30">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center bg-blue-600/10">
+            <h2 id="inspect-title" class="text-xl font-bold text-white">Entity Dossier</h2>
+            <button onclick="closeModals()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <div class="p-8 space-y-6 overflow-y-auto max-h-[700px] custom-scrollbar">
+            
+            <div class="bg-blue-600/5 border border-blue-500/20 p-5 rounded-2xl">
+                <h3 class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-3">Enrolled Level</h3>
+                <p id="info-level" class="text-lg font-black text-white mb-4">---</p>
+                
+                <h3 class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-3">Selected Subjects</h3>
+                <div id="info-subjects" class="flex flex-wrap gap-2">
+                    <p class="text-xs text-slate-500 italic">No subjects selected yet.</p>
+                </div>
+            </div>
+
+            <div class="bg-purple-600/10 p-4 rounded-2xl border border-purple-500/20">
+                <h3 class="text-[10px] font-bold text-purple-400 uppercase mb-2">Push Student Directive</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="directive-input" placeholder="e.g. Please select your 5th subject..." class="flex-1 bg-[#030712] border border-white/10 rounded-xl px-4 py-2 text-xs outline-none">
+                    <button onclick="issueDirective()" class="bg-purple-600 px-4 py-2 rounded-xl text-[10px] font-bold">Push</button>
+                </div>
+            </div>
+            
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase mb-2">Student Logs</h3>
+                <div id="student-logs" class="space-y-2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="chat-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4">
+    <div class="glass-card w-full max-w-2xl h-[650px] rounded-3xl flex flex-col overflow-hidden border border-purple-500/30">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center bg-purple-600/10">
+            <h2 id="chat-title" class="text-xl font-bold text-white">Chat</h2>
+            <button onclick="closeModals()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <div id="message-feed" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-[#030712]/40"></div>
+        <div class="p-4 bg-white/5 border-t border-white/10 flex gap-4">
+            <input type="text" id="principal-reply" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendReply()"
+                class="flex-1 bg-[#030712] border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-purple-500 outline-none text-white text-xs">
+            <button onclick="sendReply()" class="bg-purple-600 px-6 rounded-xl font-bold">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCUzB3aZnLSzFkryZX3trapEGswvsVCo4",
+        authDomain: "rsp-system.firebaseapp.com",
+        projectId: "rsp-system",
+        storageBucket: "rsp-system.firebasestorage.app",
+        messagingSenderId: "824223028059",
+        appId: "1:824223028059:web:3b3dee618a59edea47807e"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    let activeStudentId = null;
+    let unsubscribe = null;
+
+    function inspectStudent(id, name) {
+        activeStudentId = id;
+        document.getElementById('inspect-title').innerText = name;
+        document.getElementById('inspect-modal').classList.remove('hidden');
+        
+        db.collection("users").doc(id).get().then(doc => {
+            const data = doc.data();
+            
+            // 1. Display Level
+            document.getElementById('info-level').innerText = data.level || "NOT SET";
+            
+            // 2. Render Subjects as Chips
+            const subjectContainer = document.getElementById('info-subjects');
+            if (data.subjects && data.subjects.length > 0) {
+                subjectContainer.innerHTML = data.subjects.map(s => `
+                    <span class="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight">
+                        ${s}
+                    </span>
+                `).join('');
+            } else {
+                subjectContainer.innerHTML = '<p class="text-xs text-slate-500 italic">No subjects selected yet.</p>';
+            }
+
+            // 3. Render Notes
+            const logContainer = document.getElementById('student-logs');
+            logContainer.innerHTML = (data.notes && data.notes.length > 0) ? 
+                data.notes.map(n => `<div class="bg-white/5 border border-white/5 p-3 rounded-xl text-[11px] text-slate-400">${n}</div>`).join('') : 
+                '<p class="text-xs text-slate-600">No logs found.</p>';
+        });
+    }
+
+    // Remaining logic for Chat, Delete, Filter...
+    function syncNotifications() {
+        db.collection("users").onSnapshot(snap => {
+            const feed = document.getElementById('notification-feed');
+            const countBadge = document.getElementById('notif-count');
+            feed.innerHTML = ""; 
+            let count = 0;
+            snap.forEach(doc => {
+                const sid = doc.id;
+                db.collection("users").doc(sid).collection("chat").orderBy("timestamp", "desc").limit(1).get().then(chatSnap => {
+                    if(!chatSnap.empty && chatSnap.docs[0].data().sender === "student") {
+                        count++;
+                        countBadge.innerText = count;
+                        const card = document.createElement('div');
+                        card.className = "p-3 bg-purple-600/10 border border-purple-500/20 rounded-xl cursor-pointer hover:bg-purple-600/20 mb-2";
+                        card.innerHTML = `<p class="text-[10px] font-black text-purple-400 uppercase">${doc.data().username}</p>`;
+                        card.onclick = () => openChat(sid, doc.data().username);
+                        feed.prepend(card);
+                    }
+                });
+            });
+        });
+    }
+
+    function openChat(id, name) {
+        activeStudentId = id;
+        document.getElementById('chat-title').innerText = `Comms: ${name}`;
+        document.getElementById('chat-modal').classList.remove('hidden');
+        const feed = document.getElementById('message-feed');
+        if (unsubscribe) unsubscribe();
+        unsubscribe = db.collection("users").doc(id).collection("chat").orderBy("timestamp", "asc")
+            .onSnapshot(snap => {
+                feed.innerHTML = "";
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const isP = d.sender === "principal";
+                    const div = document.createElement('div');
+                    div.className = `flex ${isP ? 'justify-end' : 'justify-start'} mb-2`;
+                    div.innerHTML = `<div class="p-3 rounded-2xl text-[11px] ${isP ? 'bg-purple-600 text-white' : 'bg-white/10 text-slate-200'}">${d.message}</div>`;
+                    feed.appendChild(div);
+                });
+                feed.scrollTop = feed.scrollHeight;
+            });
+    }
+
+    function issueDirective() {
+        const val = document.getElementById('directive-input').value;
+        if(!val || !activeStudentId) return;
+        db.collection("users").doc(activeStudentId).collection("chat").add({
+            message: "PRINCIPAL DIRECTIVE: " + val,
+            sender: "principal",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            alert("Directive Sent.");
+            document.getElementById('directive-input').value = "";
+        });
+    }
+
+    function sendReply() {
+        const input = document.getElementById('principal-reply');
+        if (!input.value.trim() || !activeStudentId) return;
+        db.collection("users").doc(activeStudentId).collection("chat").add({
+            message: input.value, sender: "principal", timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        input.value = "";
+    }
+
+    function closeModals() {
+        document.getElementById('chat-modal').classList.add('hidden');
+        document.getElementById('inspect-modal').classList.add('hidden');
+        if (unsubscribe) unsubscribe();
+    }
+
+    function filterStudents() {
+        const query = document.getElementById('studentSearch').value.toLowerCase();
+        document.querySelectorAll('.student-card').forEach(card => {
+            const name = card.getAttribute('data-name');
+            card.style.display = name.includes(query) ? 'block' : 'none';
+        });
+    }
+
+    function deleteStudent(id) {
+        if(confirm("Purge student record?")) {
+            db.collection("users").doc(id).delete().then(() => location.reload());
+        }
+    }
+
+    syncNotifications();
+</script>
+</body>
+</html>

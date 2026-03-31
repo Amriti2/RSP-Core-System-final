@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Initialize Account - RSP Core</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Outfit', sans-serif;
+        background-color: #030712;
+    }
+    .bg-grid {
+        background-size: 40px 40px;
+        background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                          linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    }
+    .glow-pulse {
+        animation: pulse-glow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse-glow {
+        0%, 100% { opacity: 0.4; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.05); }
+    }
+    @keyframes shimmer {
+        100% { transform: translateX(100%); }
+    }
+</style>
+</head>
+<body class="text-slate-200 min-h-screen flex items-center justify-center relative overflow-hidden bg-grid">
+
+<div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-600/30 rounded-full blur-[120px] pointer-events-none glow-pulse"></div>
+<div class="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-500/20 rounded-full blur-[150px] pointer-events-none glow-pulse" style="animation-delay: 2s;"></div>
+
+<div class="absolute top-6 left-6 z-50">
+    <a href="javascript:history.back()" class="text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-2 text-sm uppercase tracking-widest font-semibold bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg border border-white/5 backdrop-blur-md">
+        ← Back
+    </a>
+</div>
+
+<div class="relative z-10 w-full max-w-md p-8 mx-4 bg-[#0f172a]/80 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-[0_0_40px_rgba(59,130,246,0.15)]">
+    
+    <div class="text-center mb-8">
+        <div class="inline-block mb-3 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] uppercase tracking-[0.2em] font-bold">
+            New Entity Registration
+        </div>
+        <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 tracking-tight mb-2">Create Account</h1>
+        <p class="text-slate-400 font-light text-sm">Join the next generation of student management</p>
+    </div>
+
+    <form method="POST" class="space-y-4" id="signup-form">
+        <div>
+            <label class="block text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1 ml-1">Identity</label>
+            <input type="text" name="username" placeholder="Choose a Username" required
+                class="w-full px-5 py-4 bg-[#030712]/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-300">
+        </div>
+        
+        <div>
+            <label class="block text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1 ml-1">Security Key</label>
+            <input type="password" id="password" name="password" placeholder="Create Password" required
+                class="w-full px-5 py-4 bg-[#030712]/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-300">
+        </div>
+
+        <div>
+            <label class="block text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1 ml-1">Verification</label>
+            <input type="password" id="confirm" name="confirm" placeholder="Confirm Password" required
+                class="w-full px-5 py-4 bg-[#030712]/50 border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-300">
+            <p id="match-error" class="text-red-400 text-[10px] mt-2 hidden">Passwords do not match. Deployment halted.</p>
+        </div>
+
+        <button type="submit" class="w-full group relative px-8 py-4 mt-4 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-bold transition-all duration-300 overflow-hidden shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] hover:-translate-y-0.5">
+            <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+            Initialize Account
+        </button>
+    </form>
+
+    <div class="mt-8 text-center border-t border-white/5 pt-6">
+        <p class="text-slate-500 text-sm">
+            Existing member? 
+            <a href="/login" class="text-blue-400 hover:text-blue-300 font-semibold transition-colors hover:underline underline-offset-4">
+                Access Terminal
+            </a>
+        </p>
+    </div>
+</div>
+
+<script>
+    // Basic Client-Side Validation to make it feel "Pro"
+    const form = document.getElementById('signup-form');
+    const password = document.getElementById('password');
+    const confirm = document.getElementById('confirm');
+    const errorMsg = document.getElementById('match-error');
+
+    form.addEventListener('submit', function(e) {
+        if (password.value !== confirm.value) {
+            e.preventDefault();
+            errorMsg.classList.remove('hidden');
+            confirm.classList.add('border-red-500/50');
+        }
+    });
+
+    // Real-time check
+    confirm.addEventListener('input', function() {
+        if (password.value === confirm.value) {
+            errorMsg.classList.add('hidden');
+            confirm.classList.remove('border-red-500/50');
+        }
+    });
+</script>
+
+</body>
+</html>
