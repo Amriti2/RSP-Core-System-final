@@ -12,9 +12,28 @@ app.secret_key = "supersecretkey"
 # FIREBASE SETUP
 # ------------------------
 # Ensure this JSON file is in your project folder!
-cred = credentials.Certificate("rsp-system-firebase-adminsdk-fbsvc-baa3f96b0c.json")
+import os
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+private_key = os.environ.get("FIREBASE_PRIVATE_KEY")
+
+if private_key:
+    private_key = private_key.replace("\\n", "\n")
+
+firebase_config = {
+    "type": os.environ.get("FIREBASE_TYPE"),
+    "project_id": os.environ.get("FIREBASE_PROJECT_ID"),
+    "private_key": private_key,
+    "client_email": os.environ.get("FIREBASE_CLIENT_EMAIL"),
+}
+
+cred = credentials.Certificate(firebase_config)
 firebase_admin.initialize_app(cred)
+
 db = firestore.client()
+
+
 
 # ------------------------
 # CONSTANTS
