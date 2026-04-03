@@ -28,7 +28,8 @@ firebase_config = {
     "client_email": os.environ.get("FIREBASE_CLIENT_EMAIL"),
 }
 
-cred = credentials.Certificate(firebase_config)
+cred = credentials.Certificate("rsp-system-firebase-adminsdk-fbsvc-baa3f96b0c.json")
+)
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()
