@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='logo.png') }}">
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RSP Core">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSP - Smart Student Management</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.jpg') }}">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #030712; 
+        }
+        
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+
+        .glow-pulse {
+            animation: pulse-glow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Custom Scrollbar for a High-Quality feel */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; border: 2px solid #030712; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col relative overflow-y-auto overflow-x-hidden bg-grid">
+
+<div class="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-600/30 rounded-full blur-[120px] pointer-events-none glow-pulse"></div>
+<div class="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-cyan-500/20 rounded-full blur-[150px] pointer-events-none glow-pulse" style="animation-delay: 2s;"></div>
+
+<nav class="w-full flex justify-between items-center p-6 bg-[#030712]/50 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
+    <div class="flex items-center gap-4">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="w-10 h-10 rounded-lg object-cover border border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.3)]">
+        
+        <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300 tracking-tight drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]">
+            RSP.
+        </h1>
+    </div>
+    <a href="/login" class="text-slate-300 hover:text-white font-semibold transition-all hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">
+        Student Login
+    </a>
+</nav>
+
+<section class="flex-1 flex flex-col justify-center items-center text-center px-6 py-24 relative z-10">
+    <div class="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 font-semibold text-sm shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+        System Online v2.0
+    </div>
+    
+    <h2 class="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight leading-tight">
+        Master Your <br/>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500">Student Life.</span>
+    </h2>
+    
+    <p class="text-lg md:text-xl max-w-2xl text-slate-400 mb-10 leading-relaxed font-light">
+        The smart, all-in-one terminal for your education. Track subjects, command your schedule, and connect with teachers in a seamless, high-performance environment.
+    </p>
+    
+    <div class="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
+        <a href="/signup" class="group relative px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all duration-300 overflow-hidden shadow-[0_0_20px_rgba(37,99,235,0.4)] hover:shadow-[0_0_40px_rgba(37,99,235,0.6)] hover:-translate-y-1 text-center">
+            <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+            Initialize Account
+        </a>
+        <a href="/login" class="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-bold transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm text-center">
+            Existing User Login
+        </a>
+    </div>
+</section>
+
+<section class="relative z-10 py-16 px-6 max-w-7xl mx-auto w-full">
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="group bg-[#0f172a]/80 backdrop-blur-xl p-8 rounded-2xl border border-white/5 hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(59,130,246,0.3)]">
+            <div class="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center text-3xl mb-6 border border-blue-500/20 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                📊
+            </div>
+            <h4 class="text-xl font-bold text-white mb-3 tracking-wide">Data-Driven Tracking</h4>
+            <p class="text-slate-400 leading-relaxed text-sm">Monitor your subjects and academic progress through a visually stunning, centralized dashboard.</p>
+        </div>
+
+        <div class="group bg-[#0f172a]/80 backdrop-blur-xl p-8 rounded-2xl border border-white/5 hover:border-cyan-500/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(6,182,212,0.3)]">
+            <div class="w-14 h-14 bg-cyan-500/10 rounded-xl flex items-center justify-center text-3xl mb-6 border border-cyan-500/20 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
+                ⚡
+            </div>
+            <h4 class="text-xl font-bold text-white mb-3 tracking-wide">Smart Automations</h4>
+            <p class="text-slate-400 leading-relaxed text-sm">Deploy dynamic reminders, sticky notes, and priority to-do lists so no deadline slips through.</p>
+        </div>
+
+        <div class="group bg-[#0f172a]/80 backdrop-blur-xl p-8 rounded-2xl border border-white/5 hover:border-indigo-500/50 transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(99,102,241,0.3)]">
+            <div class="w-14 h-14 bg-indigo-500/10 rounded-xl flex items-center justify-center text-3xl mb-6 border border-indigo-500/20 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+                📡
+            </div>
+            <h4 class="text-xl font-bold text-white mb-3 tracking-wide">Instant Comms</h4>
+            <p class="text-slate-400 leading-relaxed text-sm">Establish direct, low-latency communication channels with your teachers and administration.</p>
+        </div>
+    </div>
+    <div class="h-20"></div>
+</section>
+
+<footer class="mt-auto border-t border-white/10 py-8 text-center text-slate-500 text-sm relative z-10 bg-[#030712]/80 backdrop-blur-md">
+    &copy; 2026 RSP Core • Engineered for Students
+</footer>
+
+</body>
+</html>
